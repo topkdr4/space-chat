@@ -30,8 +30,6 @@ public class Config implements WebMvcConfigurer {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setPrefix("/WEB-INF/view/");
         resolver.setSuffix(".html");
-
-        //
         return resolver;
     }
 
