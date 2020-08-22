@@ -1,4 +1,4 @@
-package ru.spacechat.boot;
+package ru.spacechat.rest;
 
 
 import org.springframework.stereotype.Controller;
