@@ -68,6 +68,10 @@ public class UserProfileRepository {
             stmt.setString(index++, profile.getName());
             stmt.setTimestamp(index++, new Timestamp(profile.getBirth()));
             stmt.setString(index++, profile.getStatus());
+            stmt.setBoolean(index++, profile.isSex());
+            stmt.setString(index++, profile.getCity());
+            stmt.setString(index++, profile.getPhone());
+            stmt.setString(index++, profile.getAboutMe());
 
             stmt.execute();
 

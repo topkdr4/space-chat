@@ -46,6 +46,20 @@ public class ProfileRestApi {
             throw new OperationException("Имя не определено");
         }
 
+        if (!Util.isEmpty(reqt.getPhone())) {
+            if (reqt.getPhone().length() != 10) {
+                throw new OperationException("Неверный форман Номера телефона");
+            }
+
+            if (!reqt.getPhone().matches("^\\d+$")) {
+                throw new OperationException("Неверный формат номера телефона");
+            }
+
+            if (reqt.getPhone().charAt(0) != '9') {
+                throw new OperationException("Номер телефона должен начинаться с `9`");
+            }
+        }
+
 
         User user = userService.getCurrentUser();
 
