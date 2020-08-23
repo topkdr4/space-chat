@@ -1,13 +1,19 @@
 package ru.spacechat.repository;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.spacechat.commons.JdbcErrors;
 import ru.spacechat.commons.OperationException;
 import ru.spacechat.model.UserProfile;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.concurrent.TimeUnit;
 
 
 
@@ -16,8 +22,26 @@ import java.sql.*;
 @Repository
 public class UserProfileRepository {
 
+
+
     @Autowired
     private DataSource dataSource;
+
+
+    private final LoadingCache<String, byte[]> imageCache = buildCache();
+
+
+    public LoadingCache<String, byte[]> buildCache() {
+        return CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, byte[]>() {
+                    @Override
+                    public byte[] load(String login) {
+                        return getUserAvatar(login);
+                    }
+                });
+    }
 
 
 
@@ -74,7 +98,6 @@ public class UserProfileRepository {
             stmt.setString(index++, profile.getAboutMe());
 
             stmt.execute();
-
         } catch (Exception e) {
             throw JdbcErrors.rethrow(e);
         }
@@ -94,13 +117,20 @@ public class UserProfileRepository {
 
             stmt.execute();
 
+            imageCache.put(login, data);
         } catch (Exception e) {
             throw JdbcErrors.rethrow(e);
         }
     }
 
 
-    public byte[] getUserAvatar(String login) {
+    @SneakyThrows
+    public byte[] getAvatar(String login) {
+        return imageCache.get(login);
+    }
+
+
+    private byte[] getUserAvatar(String login) {
         try (Connection connection = dataSource.getConnection()) {
 
             connection.setAutoCommit(false);

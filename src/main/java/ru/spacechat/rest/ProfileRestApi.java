@@ -73,6 +73,10 @@ public class ProfileRestApi {
     @PostMapping("/avatar/upload")
     public SimpleResp<Boolean> uploadAvatart(@RequestParam("file") MultipartFile file) {
         try {
+            if (file.getBytes().length > 2097152) {
+                throw new OperationException("Размер файла не должен превышать 2мб");
+            }
+
             User user = userService.getCurrentUser();
             profileRepository.saveUserAvatar(user.getLogin(), file.getBytes());
             return new SimpleResp<>(true);
