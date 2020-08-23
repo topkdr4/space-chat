@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.spacechat.commons.OperationException;
 import ru.spacechat.commons.SimpleResp;
+import ru.spacechat.commons.Util;
 import ru.spacechat.model.User;
 import ru.spacechat.model.UserProfile;
 import ru.spacechat.repository.UserProfileRepository;
@@ -24,7 +25,7 @@ public class ProfileRestApi {
 
 
     @Autowired
-    private UserProfileRepository repository;
+    private UserProfileRepository profileRepository;
 
 
     @ResponseBody
@@ -32,9 +33,25 @@ public class ProfileRestApi {
     public SimpleResp<UserProfile> getProfile() {
         User user = userService.getCurrentUser();
 
-        UserProfile result = repository.getUserProfile(user.getLogin());
+        UserProfile result = profileRepository.getUserProfile(user.getLogin());
 
         return new SimpleResp<>(result);
+    }
+
+
+    @ResponseBody
+    @PostMapping("/save")
+    public SimpleResp saveProfile(@RequestBody UserProfile reqt) {
+        if (Util.isEmpty(reqt.getName())) {
+            throw new OperationException("Имя не определено");
+        }
+
+
+        User user = userService.getCurrentUser();
+
+        profileRepository.saveUserProfile(user.getLogin(), reqt);
+
+        return SimpleResp.EMPTY;
     }
 
 
@@ -43,7 +60,7 @@ public class ProfileRestApi {
     public SimpleResp<Boolean> uploadAvatart(@RequestParam("file") MultipartFile file) {
         try {
             User user = userService.getCurrentUser();
-            repository.saveUserAvatar(user.getLogin(), file.getBytes());
+            profileRepository.saveUserAvatar(user.getLogin(), file.getBytes());
             return new SimpleResp<>(true);
         } catch (Exception e) {
             throw new OperationException(e);
@@ -54,7 +71,7 @@ public class ProfileRestApi {
     @ResponseBody
     @GetMapping("/{login}/avatar")
     public byte[] getUserAvatar(@PathVariable("login") String login) {
-        return repository.getUserAvatar(login);
+        return profileRepository.getUserAvatar(login);
     }
 
 }

@@ -113,7 +113,6 @@ public class AuthRestApi {
         if (user != null)
             throw new OperationException("Такой логин уже используется");
 
-
         String passwordHash = Hashing.sha512()
                 .hashBytes(reqt.getPassword().getBytes(StandardCharsets.UTF_8))
                 .toString();
@@ -124,16 +123,15 @@ public class AuthRestApi {
 
         UserProfile profile = new UserProfile();
         profile.setStatus("");
-        profile.setLogin(result.getLogin());
         profile.setName(reqt.getName());
 
         userRepository.saveUser(result);
-        HttpSession session = request.getSession(true);
 
-        session.setAttribute(attrName, result.getLogin());
-
-        profileRepository.saveUserProfile(profile);
+        profileRepository.saveUserProfile(result.getLogin(), profile);
         profileRepository.saveUserAvatar(result.getLogin(), personIcon);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(attrName, result.getLogin());
 
         return SimpleResp.EMPTY;
     }

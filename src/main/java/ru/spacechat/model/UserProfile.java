@@ -1,19 +1,16 @@
 package ru.spacechat.model;
 
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
 
 
 
-@Data
-public class UserProfile  {
-    /**
-     *
-     */
-    private String login;
-
+@Getter
+@Setter
+public class UserProfile {
     /**
      * Имя пользователя
      */
@@ -28,5 +25,25 @@ public class UserProfile  {
      * Статус
      */
     private String status;
+
+    /**
+     * Пол
+     */
+    private boolean sex;
+
+    /**
+     * Город
+     */
+    private String city;
+
+    /**
+     * Телефон
+     */
+    private String phone;
+
+    /**
+     * О себе
+     */
+    private String aboutMe;
 
 }

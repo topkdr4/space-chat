@@ -33,17 +33,21 @@ public class UserProfileRepository {
 
             stmt.execute();
 
-            ResultSet resultSet = (ResultSet) stmt.getObject(1);
+            ResultSet set = (ResultSet) stmt.getObject(1);
 
-            if (!resultSet.next())
+            if (!set.next())
                 throw new OperationException("Профиль пользователя не найден");
 
+            Timestamp timestamp = set.getTimestamp("birth");
+
             UserProfile result = new UserProfile();
-            result.setName(resultSet.getString("name"));
-            Timestamp timestamp = resultSet.getTimestamp("birth");
+            result.setName(set.getString("name"));
             result.setBirth(timestamp == null ? null : timestamp.getTime());
-            result.setStatus(resultSet.getString("status"));
-            result.setLogin(login);
+            result.setStatus(set.getString("status"));
+            result.setPhone(set.getString("phone"));
+            result.setCity(set.getString("city"));
+            result.setAboutMe(set.getString("about_me"));
+            result.setSex(set.getBoolean("sex"));
 
             return result;
         } catch (Exception e) {
@@ -52,7 +56,7 @@ public class UserProfileRepository {
     }
 
 
-    public void saveUserProfile(UserProfile profile) {
+    public void saveUserProfile(String login, UserProfile profile) {
         try (Connection connection = dataSource.getConnection()) {
 
             connection.setAutoCommit(true);
@@ -60,7 +64,7 @@ public class UserProfileRepository {
             int index = 1;
 
             CallableStatement stmt = connection.prepareCall("{call save_user_profile(?, ?, ?, ?)}");
-            stmt.setString(index++, profile.getLogin());
+            stmt.setString(index++, login);
             stmt.setString(index++, profile.getName());
             stmt.setTimestamp(index++, new Timestamp(profile.getBirth()));
             stmt.setString(index++, profile.getStatus());
