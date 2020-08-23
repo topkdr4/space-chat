@@ -89,7 +89,7 @@ public class ProfileRestApi {
     @ResponseBody
     @GetMapping("/{login}/avatar")
     public byte[] getUserAvatar(@PathVariable("login") String login) {
-        return profileRepository.getUserAvatar(login);
+        return profileRepository.getAvatar(login);
     }
 
 }
