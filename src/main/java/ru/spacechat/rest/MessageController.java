@@ -2,22 +2,18 @@ package ru.spacechat.rest;
 
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import ru.spacechat.model.User;
 import ru.spacechat.repository.UserRepository;
-import ru.spacechat.wsmodel.InputMessage;
 
 
 
 
 
+@Slf4j
 @Controller
 public class MessageController {
 
@@ -29,12 +25,13 @@ public class MessageController {
     @Qualifier("attrName")
     private String attrName;
 
-
-    @MessageMapping("/topic/chat/{user}")
-    @SendTo("/topic/chat/{user}")
-    public Message simple(@DestinationVariable String user, InputMessage message, SimpMessageHeaderAccessor headerAccessor) {
+/*
+    @MessageMapping("/chat/{user}")
+    public void simple(@DestinationVariable String user, ru.spacechat.model.chat.Message message, SimpMessageHeaderAccessor headerAccessor) {
 
         String login = (String) headerAccessor.getSessionAttributes().get(attrName);
+
+        log.info("login: {}", login);
 
         User currentUser = repository.getUser(login);
 
@@ -42,14 +39,14 @@ public class MessageController {
         result.setMessage(message.getMessage());
         result.setFrom(currentUser.getLogin());
 
-        return result;
-    }
+
+    }*/
 
 
 
 
     @Data
-    protected class Message {
+    protected static class Message {
         protected final long timestamp = System.currentTimeMillis();
         protected String from;
         protected String message;
