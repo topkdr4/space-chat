@@ -5,8 +5,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import ru.spacechat.model.User;
 import ru.spacechat.repository.UserRepository;
 
 
@@ -25,7 +29,7 @@ public class MessageController {
     @Qualifier("attrName")
     private String attrName;
 
-/*
+
     @MessageMapping("/chat/{user}")
     public void simple(@DestinationVariable String user, ru.spacechat.model.chat.Message message, SimpMessageHeaderAccessor headerAccessor) {
 
@@ -38,9 +42,7 @@ public class MessageController {
         Message result = new Message();
         result.setMessage(message.getMessage());
         result.setFrom(currentUser.getLogin());
-
-
-    }*/
+    }
 
 
 

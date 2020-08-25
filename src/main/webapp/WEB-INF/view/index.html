@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Тест чата</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" text="text/css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>    
@@ -12,41 +13,103 @@
 </head>
 <body>
     <div id="app">
-        <div class="container-fluid">
-            <div class="row" style="margin-bottom: 2em;">
-                <input type="text" v-model="login" placeholder="login" />
-                <input type="text" v-model="password" placeholder="password" />
-                <input type="button" value="авторизоваться" @click="auth" />
-            </div>
+        <div class="container-fluid" v-if="init">
             <div class="row">
-                <test-chat ref="chat1" class="col" 
-                    :key="'1'" 
-                    :user="'admin1'"
-                ></test-chat>
-                <test-chat ref="chat2" class="col" 
-                    :key="'2'" 
-                    :user="'admin2'"
-                ></test-chat>
+                <dialogs>
+                    <test-chat ref="chat1" class="col" 
+                        :key="'1'" 
+                        :user="'admin1'"
+                    ></test-chat>
+                </dialogs>                
             </div>
-        </div>        
+        </div>    
     </div>
+
+    <div class="modal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Вход в чат</h5>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="login">Пользователь</label>
+                            <select class="form-control" id="login" v-model="user">
+                                <option v-for="it in users"
+                                    :key="it.id"
+                                    :value="it.login"
+                                >{{it.login}}</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" @click="enter">Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
 
     <script type="text/javascript">
         const dialog = '9WXUVVT14NY75YVOAS0D9CHKFSFLDHJ6'
 
+        Vue.component('dialogs', {
+            template: `
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="row all-dialogs">
+                                <div class="col-12" v-for="it in dialogs">
+                                    <div class="card flex-row flex-wrap">
+                                        <div class="">
+                                            <img :src="it.avatar" alt="">
+                                        </div>
+                                        <div class="card-block px-2">
+                                            <h4 class="card-title">{{it.title}}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <slot></slot>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    dialogs: []
+                }
+            },
+            created() {
+                for (let i = 0; i < 50; i++) {
+                    this.dialogs.push({
+                        id: i,
+                        title: 'Диалог ' + i,
+                        avatar: 'http://placehold.it/50'
+                    })
+                }
+            }
+        });
+
         Vue.component('test-chat', {
             template: `
-                    <form>
-                        <div class="row">
-                            <div>Сообщения:<br></div>
-                            <div class="row" v-for="it in messages"> 
+                    <form class="dialog">
+                        <div class="messages-box" ref="messages">
+                            <div class="row messages" v-for="it in messages">
                                 <div class="col">[{{it.date}}] {{it.from}} - {{it.message}}</div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <textarea class="form-control" v-model="message"></textarea>
+                        <div class="input-group">
+                            <textarea class="form-control" v-model="message" @keyup.enter="send"></textarea>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" :disabled="disabled" type="button" id="button-addon1" @click="send"><i class="fa fa-paper-plane"></i></button>
+                            </div>
                         </div>
-                        <input type="button" :disabled="disabled" class="btn btn-primary form-control" value="Отправить" @click="send" />
                     </form>     
             `,
             props: {
@@ -81,8 +144,12 @@
                         from: data.initiator,
                         message: data.message
                     })
+
+console.log(this.$refs.messages)
+                    this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
                 },
-                async send() {
+                async send(e) {
+                    e.preventDefault();
                     $.ajax({
                         url: '/api/chat/send',
                         method: 'POST',
@@ -105,11 +172,29 @@
             data() {
                 return {
                     login: 'admin1',
-                    password: '123456'
+                    password: '123456',
+                    init: false
+                }
+            }
+        });
+
+        const modal = new Vue({
+            el: '.modal',
+            data() {
+                return {
+                    user: 'admin1',
+                    users: []
                 }
             },
+            mounted() {
+                const modal = this.$options.modal = $(this.$el);
+                modal.modal('show')
+            },
             methods: {
-                auth() {
+                enter() {
+                    const user = this.users.find(it => it.login = this.user);
+                    const that = this;
+
                     $.ajax({
                         url: '/user/login',
                         method: 'POST',
@@ -117,14 +202,42 @@
                             'Content-Type': 'application/json'
                         },
                         dataType: 'json',
-                        data: JSON.stringify({
-                            login: this.login,
-                            password: this.password
-                        })
+                        data: JSON.stringify(user),
+                        success() {
+                            that.$options.modal.modal('toggle');
+                            app.init = true;
+                        },
+                        error(e) {
+                            console.error(e)
+                        }
                     });
                 }
             }
-        })
+        });
+
+        for (let i = 1; i < 6; i++) {
+            modal.users.push({
+                login: 'admin' + i,
+                password: '123456'
+            })
+        }
+
     </script>
+    <style>
+        .messages-box {
+            height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .dialog {
+            height: 100vh;
+        }
+
+        .all-dialogs {
+            height: 100vh;
+            overflow: auto;
+        }
+    </style>
 </body>
 </html>
