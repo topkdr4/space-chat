@@ -1,5 +1,6 @@
 package ru.spacechat.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.server.ServerHttpRequest;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 
 
-
+@Slf4j
 @Service
 public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 
@@ -58,11 +59,9 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
                 userService.setCurrentUser(user);
 
                 map.put(attrName, login);
-
             } catch (Exception e) {
-
+                log.error("error: ", e);
             }
-
         }
         return true;
     }

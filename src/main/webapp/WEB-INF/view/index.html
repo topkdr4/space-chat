@@ -150,17 +150,10 @@ console.log(this.$refs.messages)
                 },
                 async send(e) {
                     e.preventDefault();
-                    $.ajax({
-                        url: '/api/chat/send',
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        data: JSON.stringify({
-                            chat: dialog,
-                            message: this.message
-                        })
-                    });
+                    this.$options.stompClient.send('/app/chat.send', {}, JSON.stringify({
+                        chat: dialog,
+                        message: this.message
+                    }));
 
                     this.message = '';
                 }

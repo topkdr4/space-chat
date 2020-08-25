@@ -98,49 +98,6 @@ public class ChatRestApi {
     }
 
 
-    @ResponseBody
-    @PostMapping("/send")
-    public SimpleResp send(@RequestBody SendMessageReqt reqt) {
-        if (Util.isEmpty(reqt.getChat())) {
-            throw new OperationException("Чат не определен");
-        }
-
-        if (Util.isEmpty(reqt.getMessage())) {
-            throw new OperationException("Сообщение не определено");
-        }
-
-        User currentUser = userService.getCurrentUser();
-
-        List<ChatInfo> allChats = chatRepository.getChatList(currentUser.getLogin());
-        ChatInfo chat = null;
-
-        for (ChatInfo chatInfo : allChats) {
-            if (chatInfo.getId().equals(reqt.getChat())) {
-                chat = chatInfo;
-                break;
-            }
-        }
-
-        if (chat == null) {
-            throw new OperationException("Чат недоступен");
-        }
-
-        Message message = new Message();
-        message.setChat(reqt.getChat());
-        message.setInitiator(currentUser.getLogin());
-        message.setMessage(reqt.getMessage());
-        message.setAction(MessageAction.NEW_MESSAGE);
-        message.setType(MessageType.TEXT);
-
-        for (ChatMember member : chat.getMembers()) {
-            simpMessagingTemplate.convertAndSend("/topic/chat/" + member.getLogin(), message);
-        }
-
-        return SimpleResp.EMPTY;
-    }
-
-
-
 
     @Data
     protected static class CreateChatReqt {
