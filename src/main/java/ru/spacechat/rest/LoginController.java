@@ -14,4 +14,10 @@ public class LoginController {
     }
 
 
+    @RequestMapping(value = "/2", method = RequestMethod.GET)
+    public String init2() {
+        return "index2";
+    }
+
+
 }
